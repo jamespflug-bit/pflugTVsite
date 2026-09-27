@@ -1,0 +1,55 @@
+# Checks the "On Location" category on pflugtv.com every hour and opens (or
+# updates) one pull request with the new visits. Merging it publishes them.
+# Setup: add the ANTHROPIC_API_KEY repository secret, and allow Actions to
+# create pull requests (Settings → Actions → General → Workflow permissions).
+name: Import visits from blog
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ingest
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Load rows already waiting in the open pull request
+        run: |
+          if git fetch --depth=1 origin auto/new-visits 2>/dev/null; then
+            git show FETCH_HEAD:data/facilities.csv > "$RUNNER_TEMP/pending.csv" || true
+            git show FETCH_HEAD:data/ingest-skip.txt > "$RUNNER_TEMP/pending-skip.txt" || true
+          fi
+
+      - name: Import new posts
+        run: node scripts/ingest.mjs
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PENDING_CSV: ${{ runner.temp }}/pending.csv
+          PENDING_SKIP: ${{ runner.temp }}/pending-skip.txt
+          PR_BODY: ${{ runner.temp }}/pr-body.md
+
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          branch: auto/new-visits
+          delete-branch: true
+          add-paths: |
+            data/facilities.csv
+            data/ingest-skip.txt
+          commit-message: Add new visits from pflugtv.com
+          title: New visits from pflugtv.com
+          body-path: ${{ runner.temp }}/pr-body.md

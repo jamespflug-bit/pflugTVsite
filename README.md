@@ -8,7 +8,8 @@ alongside [pflugtv.com](https://pflugtv.com/about/) as a credibility piece.
 - Search and industry filters, plus a list that flies the map to each site
 - Handles confidential visits: NDA sites can show as anonymous pins, or be left off entirely
 - Styled to match pflugtv.com, and works on phones
-- No build tools or API keys. Plain HTML/JS with Leaflet in `public/vendor/`
+- Post a visit to your blog and it lands on the map after you approve it (see below)
+- The map itself is plain HTML/JS with Leaflet in `public/vendor/`, with no build tools or API keys
 
 ## Maintaining the list
 
@@ -45,9 +46,43 @@ who can see this repository.** If the repo is public, don't put real NDA
 details in it. Either make the repo private (GitHub Pages from a private repo
 needs a paid plan) or keep confidential rows vague in the CSV too.
 
+## Posting a visit from your blog
+
+The easiest way to add a visit is to post about it on pflugtv.com:
+
+1. In the WordPress app, write a quick post in the **On Location** category.
+   A photo and a line or two are enough, e.g. "Walked the TV compound at
+   SoFi Stadium for the season opener". Say "under NDA" or "confidential" in
+   the text if the client or site shouldn't be named, and it will be added
+   as an anonymous pin.
+2. Within the hour, `.github/workflows/ingest.yml` picks the post up. Claude
+   reads the text and photos to fill in the facility name, type, place and
+   date, and OpenStreetMap supplies the coordinates.
+3. You get a pull request, **"New visits from pflugtv.com"**, listing each
+   visit with a link to check its pin and anything worth double-checking.
+   New posts are added to the same PR until you merge it.
+4. Review it in the GitHub app. Edit `data/facilities.csv` on the PR branch
+   if anything needs changing, then tap **Merge**. The map updates about a
+   minute later, and each pin links to its blog post.
+
+Posts that don't read like a facility visit are recorded in
+`data/ingest-skip.txt` instead, so they aren't processed again. Each new
+post costs a few cents of Claude usage. Hourly checks with nothing new are
+free.
+
+One-time setup:
+- Create an **On Location** category on the blog (slug `on-location`).
+- Create an API key at [console.anthropic.com](https://console.anthropic.com/)
+  and add it as a repository secret named `ANTHROPIC_API_KEY`
+  (Settings → Secrets and variables → Actions).
+- Settings → Actions → General → Workflow permissions: tick **Allow GitHub
+  Actions to create and approve pull requests**.
+- To test it without waiting for the hour, go to Actions → "Import visits
+  from blog" → **Run workflow**.
+
 ## Run locally
 
-Requires Node 18+. There are no dependencies to install.
+Requires Node 18+. The map needs nothing installed. Run `npm install` only if you want to run the blog importer locally.
 
 ```sh
 npm run build   # validate the CSV → public/data/facilities.json

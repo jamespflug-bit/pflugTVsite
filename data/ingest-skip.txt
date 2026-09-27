@@ -1,0 +1,2 @@
+# Blog post URLs the travel-map importer should ignore, one per line.
+# The importer adds posts here itself when a post doesn't read like a facility visit.
