@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  // URL options: ?theme=light|dark  ?embed=1 (hides the title, for iframes)
+  // URL options: ?theme=dark  ?embed=1 (map only, no header/footer, for iframes)
   const params = new URLSearchParams(location.search);
   if (['light', 'dark'].includes(params.get('theme'))) document.documentElement.dataset.theme = params.get('theme');
   if (params.has('embed')) document.body.classList.add('embed');
@@ -22,14 +22,10 @@
     return m ? new Date(Number(y), Number(m) - 1).toLocaleString(undefined, { month: 'short', year: 'numeric' }) : y;
   };
 
-  const isDark = () => {
-    const forced = document.documentElement.dataset.theme;
-    return forced ? forced === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
-  };
+  const isDark = () => document.documentElement.dataset.theme === 'dark';
 
   const map = L.map('map', { worldCopyJump: true, zoomControl: true }).setView([30, -40], 2);
-  let tiles = L.tileLayer(isDark() ? TILES.dark : TILES.light, { attribution: ATTRIBUTION, subdomains: 'abcd', maxZoom: 18 }).addTo(map);
-  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => tiles.setUrl(isDark() ? TILES.dark : TILES.light));
+  L.tileLayer(isDark() ? TILES.dark : TILES.light, { attribution: ATTRIBUTION, subdomains: 'abcd', maxZoom: 18 }).addTo(map);
 
   const cluster = L.markerClusterGroup({
     showCoverageOnHover: false,
@@ -60,7 +56,7 @@
       ['Facilities', stats.facilities],
       ['Countries', stats.countries],
       ['Regions', stats.regions],
-      ['Industries', stats.categories],
+      ['Types', stats.categories],
     ];
     if (stats.since) tiles.push(['Since', stats.since]);
     $('stats').innerHTML = tiles.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('');

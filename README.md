@@ -7,8 +7,8 @@ alongside [pflugtv.com](https://pflugtv.com/about/) as a credibility piece.
 - Headline stats: facilities, countries, regions, industries, "since" year
 - Search and industry filters, plus a list that flies the map to each site
 - Handles confidential visits: NDA sites can show as anonymous pins, or be left off entirely
-- Light and dark themes, works on phones, and can be embedded with an iframe
-- No build tools or API keys. Plain HTML/JS with Leaflet vendored in `public/vendor/`
+- Styled to match pflugtv.com, and works on phones
+- No build tools or API keys. Plain HTML/JS with Leaflet in `public/vendor/`
 
 ## Maintaining the list
 
@@ -20,7 +20,7 @@ Sheets (File → Download → CSV) or directly on GitHub. The rows in it now are
 |---|---|---|
 | `name` | ✔ | Facility name as shown on the map |
 | `company` | | Operator / owner |
-| `category` | ✔ | Industry label, e.g. `Energy`, `Manufacturing`. Each distinct value becomes a filter chip and colour |
+| `category` | ✔ | Facility type, e.g. `Broadcast Center`, `Stadium & Arena`. Each distinct value becomes a filter chip and colour |
 | `city`, `region` | | `region` = state / province (it feeds the Regions count) |
 | `country` | ✔ | |
 | `lat`, `lng` | ✔ | Decimal degrees. In Google Maps, right-click a spot and click the coordinates to copy them |
@@ -58,36 +58,39 @@ npm test
 If the CSV has a problem (a missing field, a bad coordinate, a typo in
 `visibility`), the build stops and names the line.
 
-## Publishing
+## Publishing at map.pflugtv.com
+
+pflugtv.com is on WordPress.com Premium, which strips iframes and doesn't
+allow plugins. So the map lives on its own subdomain instead. Its header,
+font and colours mirror the WordPress theme, and it links back to the main site.
 
 `.github/workflows/deploy.yml` validates, builds and deploys `public/` to
-GitHub Pages on every push to `main`. One-time setup: **Settings → Pages →
-Source: GitHub Actions**. The map will then be live at
-`https://jamespflug-bit.github.io/pflugTVsite/`. You can point a subdomain
-such as `map.pflugtv.com` at it under Settings → Pages → Custom domain.
+GitHub Pages on every push to `main`.
 
-Any other static host (Netlify, Cloudflare Pages, your own web server) also
-works: run `npm run build` and upload the `public/` folder.
+One-time setup:
 
-### Embedding on pflugtv.com
+1. **GitHub → Settings → General**: set the default branch to `main`.
+2. **GitHub → Settings → Pages**: set Source to **GitHub Actions**, then
+   set Custom domain to `map.pflugtv.com`. Tick **Enforce HTTPS** once
+   the certificate is issued, which takes a few minutes after DNS resolves.
+3. **DNS** (WordPress.com → Domains → pflugtv.com → DNS records): add a
+   `CNAME` record with name `map` pointing to `jamespflug-bit.github.io`.
+4. **WordPress**: add a "Travel Map" link to `https://map.pflugtv.com/` in
+   the site navigation (Appearance → Editor → Navigation) and on the About page.
 
-Add a Custom HTML block (WordPress) or an embed/code block (Squarespace, Wix)
-to a page:
-
-```html
-<iframe src="https://jamespflug-bit.github.io/pflugTVsite/?embed=1"
-        title="PflugTV travel map" loading="lazy"
-        style="width:100%;height:780px;border:0;border-radius:10px"></iframe>
-```
-
-URL options:
-- `?embed=1` hides the page title, since your site provides its own heading
-- `?theme=light` or `?theme=dark` forces a theme. By default it follows the visitor's system setting
+Other options:
+- `?theme=dark` gives a dark version.
+- `?embed=1` shows only the map, without the header and footer. It's for an
+  iframe if you ever move to a WordPress.com Business plan:
+  `<iframe src="https://map.pflugtv.com/?embed=1" style="width:100%;height:780px;border:0"></iframe>`
 
 ## Branding
 
-Colours and font are CSS variables at the top of `public/map.css` (`--accent`
-colours the clusters and links). The heading text is in `public/index.html`.
+Colours are CSS variables at the top of `public/map.css`, copied from the
+WordPress theme presets (`--accent` = the theme's purple, `--highlight` = its
+yellow). Manrope is self-hosted from `public/fonts/`. The header links, heading
+and footer text are in `public/index.html`. If you add pages to the main
+site's menu, add them to the header there too.
 Map tiles are CARTO's free basemaps (`TILES` in `public/map.js`). They're fine
 for a personal site's traffic. For heavy traffic, switch to a keyed provider
 such as MapTiler or Stadia.

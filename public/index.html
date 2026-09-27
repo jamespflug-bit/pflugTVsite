@@ -3,20 +3,39 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PflugTV Travel Map</title>
-  <meta name="description" content="Industrial facilities, plants and job sites PflugTV has visited around the world.">
+  <title>Travel Map – James Stellpflug</title>
+  <meta name="description" content="Broadcast centers, venues, studios and control rooms James Stellpflug has worked in and toured.">
+  <link rel="canonical" href="https://map.pflugtv.com/">
+  <meta property="og:title" content="Travel Map – James Stellpflug">
+  <meta property="og:description" content="Broadcast centers, venues, studios and control rooms James Stellpflug has worked in and toured.">
+  <meta property="og:url" content="https://map.pflugtv.com/">
+  <link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="vendor/leaflet.css">
   <link rel="stylesheet" href="vendor/MarkerCluster.css">
   <link rel="stylesheet" href="map.css">
 </head>
 <body>
-  <header class="top">
+  <!-- Mirrors the pflugtv.com (Twenty Twenty-Five) header so the jump between sites feels seamless. -->
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="site-title" href="https://pflugtv.com/">James Stellpflug</a>
+      <nav aria-label="Main">
+        <ul class="site-nav">
+          <li><a href="https://pflugtv.com/">Blog</a></li>
+          <li><a href="https://pflugtv.com/about/">About</a></li>
+          <li><a href="./" aria-current="page">Travel Map</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <section class="top">
     <div class="title">
       <h1>Where I've Been</h1>
-      <p>Facilities, plants and sites visited on the road with PflugTV.</p>
+      <p>Broadcast centers, venues, studios and control rooms I've worked in and toured.</p>
     </div>
     <dl class="stats" id="stats" aria-live="polite"></dl>
-  </header>
+  </section>
 
   <main class="layout">
     <aside class="panel">
@@ -27,6 +46,11 @@
     </aside>
     <div id="map" class="map" role="region" aria-label="Map of visited facilities"></div>
   </main>
+
+  <footer class="site-footer">
+    <a href="https://pflugtv.com/">pflugtv.com</a>
+    <span>Live production technology, media workflows, and lessons from keeping it on the air.</span>
+  </footer>
 
   <script src="vendor/leaflet.js"></script>
   <script src="vendor/leaflet.markercluster.js"></script>
