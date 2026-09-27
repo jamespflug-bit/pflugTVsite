@@ -1,0 +1,25 @@
+# Manual helper: Actions → "Geocode addresses" → Run workflow, paste places or
+# street addresses separated by ";", and read the coordinates in the run log.
+name: Geocode addresses
+
+on:
+  workflow_dispatch:
+    inputs:
+      queries:
+        description: 'Places or addresses, separated by ";"'
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  geocode:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/geocode.mjs "$QUERIES"
+        env:
+          QUERIES: ${{ inputs.queries }}
