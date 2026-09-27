@@ -91,6 +91,9 @@ WordPress theme presets (`--accent` = the theme's purple, `--highlight` = its
 yellow). Manrope is self-hosted from `public/fonts/`. The header links, heading
 and footer text are in `public/index.html`. If you add pages to the main
 site's menu, add them to the header there too.
-Map tiles are CARTO's free basemaps (`TILES` in `public/map.js`). They're fine
-for a personal site's traffic. For heavy traffic, switch to a keyed provider
-such as MapTiler or Stadia.
+
+The basemap is [OpenFreeMap](https://openfreemap.org/)'s "Positron" style,
+drawn with MapLibre GL. It's free, with no API key or usage limits. If the
+visitor's browser can't render it (no WebGL) or OpenFreeMap is down, the map
+falls back to standard OpenStreetMap tiles. Both are set up in `addBasemap()`
+in `public/map.js`.

@@ -7,11 +7,11 @@
   if (params.has('embed')) document.body.classList.add('embed');
 
   const PALETTE = ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#14b8a6', '#ec4899', '#84cc16', '#64748b'];
-  const TILES = {
-    light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-    dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-  };
-  const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
+  // Basemap: OpenFreeMap vector tiles (free, no API key). Falls back to the
+  // standard OpenStreetMap raster tiles if WebGL or the style is unavailable.
+  const OFM_STYLE = (theme) => `https://tiles.openfreemap.org/styles/${theme === 'dark' ? 'dark' : 'positron'}`;
+  const OSM_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+  const OFM_ATTRIBUTION = '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> &copy; <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a> ' + OSM_ATTRIBUTION;
 
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -24,8 +24,30 @@
 
   const isDark = () => document.documentElement.dataset.theme === 'dark';
 
-  const map = L.map('map', { worldCopyJump: true, zoomControl: true }).setView([30, -40], 2);
-  L.tileLayer(isDark() ? TILES.dark : TILES.light, { attribution: ATTRIBUTION, subdomains: 'abcd', maxZoom: 18 }).addTo(map);
+  const map = L.map('map', { worldCopyJump: true, zoomControl: true, minZoom: 2, maxZoom: 18 }).setView([30, -40], 2);
+  addBasemap();
+
+  function addBasemap() {
+    const useRasterTiles = () => L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: OSM_ATTRIBUTION, maxZoom: 19 }).addTo(map);
+    const canvas = document.createElement('canvas');
+    const hasWebGL = !!(canvas.getContext('webgl2') || canvas.getContext('webgl'));
+    if (!L.maplibreGL || !hasWebGL) return useRasterTiles();
+
+    try {
+      const layer = L.maplibreGL({ style: OFM_STYLE(isDark() ? 'dark' : 'light'), attribution: OFM_ATTRIBUTION }).addTo(map);
+      const glMap = layer.getMaplibreMap();
+      let styleLoaded = false;
+      glMap.once('style.load', () => { styleLoaded = true; });
+      // Only a failure to load the style itself triggers the fallback; a single missing tile doesn't.
+      glMap.on('error', () => {
+        if (styleLoaded || !map.hasLayer(layer)) return;
+        map.removeLayer(layer);
+        useRasterTiles();
+      });
+    } catch {
+      useRasterTiles();
+    }
+  }
 
   const cluster = L.markerClusterGroup({
     showCoverageOnHover: false,
