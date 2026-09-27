@@ -48,3 +48,8 @@ test('appendRows leaves existing text untouched and quotes when needed', () => {
   assert.equal(appendRows('a\n', []), 'a\n');
   assert.ok(toCsvLine({ name: 'A, "B"' }).startsWith('"A, ""B"""'));
 });
+
+test('facility types are the fixed filter list', async () => {
+  const { FACILITY_TYPES } = await import('./ingest.mjs');
+  assert.deepEqual(FACILITY_TYPES, ['Broadcast Center', 'Stadium & Arena', 'TV Production Studio', 'Network Operations Centers', 'Data Center', 'Corporate Centers']);
+});

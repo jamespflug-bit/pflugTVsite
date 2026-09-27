@@ -21,7 +21,7 @@ Sheets (File → Download → CSV) or directly on GitHub. The rows in it now are
 |---|---|---|
 | `name` | ✔ | Facility name as shown on the map |
 | `company` | | Operator / owner |
-| `category` | ✔ | Facility type, e.g. `Broadcast Center`, `Stadium & Arena`. Each distinct value becomes a filter chip and colour |
+| `category` | ✔ | Facility type, one of the six listed under "Posting a visit". Each distinct value becomes a filter chip and colour |
 | `city`, `region` | | `region` = state / province (it feeds the Regions count) |
 | `country` | ✔ | |
 | `lat`, `lng` | ✔ | Decimal degrees. In Google Maps, right-click a spot and click the coordinates to copy them |
@@ -88,6 +88,12 @@ The post publishes right away with the photo. The importer picks it up
 within the hour and uses the year from the text, since WordPress strips the
 photo's own date. Add `[status draft]` to hold a post back for editing
 first. Drafts aren't imported until you publish them.
+
+Each visit gets one of six facility types, which become the map's filter
+buttons: Broadcast Center, Stadium & Arena, TV Production Studio, Network
+Operations Centers, Data Center and Corporate Centers. To change the list,
+edit `FACILITY_TYPES` in `scripts/ingest.mjs`. A type you type by hand into
+the CSV is also accepted.
 
 Posts that don't read like a facility visit are recorded in
 `data/ingest-skip.txt` instead, so they aren't processed again. Each new

@@ -24,6 +24,9 @@ const CSV_PATH = path.join(root, 'data', 'facilities.csv');
 const SKIP_PATH = path.join(root, 'data', 'ingest-skip.txt');
 
 export const COLUMNS = ['name', 'company', 'category', 'city', 'region', 'country', 'lat', 'lng', 'visited', 'description', 'link', 'visibility', 'public_label'];
+// The facility types shown as map filters. The AI must pick one of these, plus any
+// other type already used in data/facilities.csv (so a hand-added type still works).
+export const FACILITY_TYPES = ['Broadcast Center', 'Stadium & Arena', 'TV Production Studio', 'Network Operations Centers', 'Data Center', 'Corporate Centers'];
 const USER_AGENT = 'pflugtv-travel-map/1.0 (+https://map.pflugtv.com)';
 const MODEL = 'claude-opus-5';
 
@@ -118,7 +121,7 @@ export async function fetchCategoryPosts(site, slug, isNew) {
 
 // ---------- Claude ----------
 
-const VISIT_SCHEMA = {
+const visitSchema = (types) => ({
   type: 'object',
   additionalProperties: false,
   required: ['is_facility_visit', 'name', 'company', 'category', 'city', 'region', 'country', 'visited', 'description', 'visibility', 'public_label', 'geocode_queries', 'reviewer_notes'],
@@ -126,7 +129,7 @@ const VISIT_SCHEMA = {
     is_facility_visit: { type: 'boolean', description: 'False if the post is not about visiting or working at a specific facility or venue.' },
     name: { type: 'string', description: 'Facility name as it should appear on the map, e.g. "SoFi Stadium" or "CBS Broadcast Center".' },
     company: { type: 'string', description: 'Owner/operator or the client you worked with there. Empty if unknown.' },
-    category: { type: 'string', description: 'Facility type. Reuse an existing category when one fits.' },
+    category: { type: 'string', enum: types, description: 'Facility type: the closest fit from the list. Mention in reviewer_notes if none fits well.' },
     city: { type: 'string' },
     region: { type: 'string', description: 'State / province, abbreviated for the US (e.g. "CA").' },
     country: { type: 'string', description: 'Use "USA" and "UK" for those two; full English name otherwise.' },
@@ -137,7 +140,7 @@ const VISIT_SCHEMA = {
     geocode_queries: { type: 'array', items: { type: 'string' }, description: 'OpenStreetMap search queries, most specific first, ending with the city, e.g. ["SoFi Stadium, Inglewood, CA, USA", "Inglewood, CA, USA"].' },
     reviewer_notes: { type: 'string', description: 'Anything uncertain the reviewer should double-check. Empty if confident.' },
   },
-};
+});
 
 const SYSTEM = `You maintain the travel map for James Stellpflug (PflugTV), a broadcast and live-production technology professional. Each blog post in the "On Location" category is a short note, often with a photo, about a broadcast center, stadium, studio, venue, data center or similar facility he visited or worked at.
 
@@ -159,7 +162,7 @@ export async function extractVisit(post, categories, { withImages = true } = {})
   const text = `Post title: ${htmlToText(post.title?.rendered)}
 Post date: ${post.date.slice(0, 10)}
 Post URL: ${post.link}
-Existing categories: ${categories.join(', ') || '(none yet)'}
+Facility types: ${categories.join(', ')}
 
 Post text:
 ${htmlToText(post.content?.rendered) || '(no text)'}`;
@@ -173,7 +176,7 @@ ${htmlToText(post.content?.rendered) || '(no text)'}`;
       max_tokens: 16000,
       betas: ['server-side-fallback-2026-07-01'],
       fallbacks: 'default',
-      output_config: { effort: 'medium', format: { type: 'json_schema', schema: VISIT_SCHEMA } },
+      output_config: { effort: 'medium', format: { type: 'json_schema', schema: visitSchema(categories) } },
       system: SYSTEM,
       messages: [{ role: 'user', content }],
     });
@@ -222,7 +225,7 @@ async function main() {
   const skip = new Set([...skipLines(skipText), ...pendingSkips]);
   const newSkips = pendingSkips.filter((l) => !skipLines(skipText).includes(l));
   const pending = new Map(parseCsv(process.env.PENDING_CSV ? await readOptional(process.env.PENDING_CSV) : '').filter((r) => r.link && !known.has(r.link)).map((r) => [r.link, r]));
-  const categories = [...new Set(existing.map((r) => r.category).filter(Boolean))];
+  const categories = [...new Set([...FACILITY_TYPES, ...existing.map((r) => r.category).filter(Boolean)])];
 
   const posts = await fetchCategoryPosts(site, slug, (link) => !known.has(link) && !skip.has(link));
   const rows = [];
@@ -245,7 +248,6 @@ async function main() {
       const place = x.geocode_queries.length ? await geocode(x.geocode_queries) : null;
       const row = rowFromExtraction(post, x, place);
       rows.push(row);
-      if (x.category && !categories.includes(x.category)) categories.push(x.category);
 
       const flags = [];
       if (!place) flags.push('⚠️ **No coordinates found.** Fill in `lat`/`lng` before merging, or the deploy will fail');
