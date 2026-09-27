@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PflugTV Travel Map</title>
+  <meta name="description" content="Industrial facilities, plants and job sites PflugTV has visited around the world.">
+  <link rel="stylesheet" href="vendor/leaflet.css">
+  <link rel="stylesheet" href="vendor/MarkerCluster.css">
+  <link rel="stylesheet" href="map.css">
+</head>
+<body>
+  <header class="top">
+    <div class="title">
+      <h1>Where I've Been</h1>
+      <p>Facilities, plants and sites visited on the road with PflugTV.</p>
+    </div>
+    <dl class="stats" id="stats" aria-live="polite"></dl>
+  </header>
+
+  <main class="layout">
+    <aside class="panel">
+      <input id="search" class="search" type="search" placeholder="Search by name, city, country…" aria-label="Search facilities">
+      <div id="chips" class="chips" role="group" aria-label="Filter by category"></div>
+      <p id="count" class="count"></p>
+      <ul id="list" class="list"></ul>
+    </aside>
+    <div id="map" class="map" role="region" aria-label="Map of visited facilities"></div>
+  </main>
+
+  <script src="vendor/leaflet.js"></script>
+  <script src="vendor/leaflet.markercluster.js"></script>
+  <script src="map.js"></script>
+</body>
+</html>

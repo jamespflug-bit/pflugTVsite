@@ -1,0 +1,3 @@
+node_modules/
+public/data/facilities.json
+.DS_Store

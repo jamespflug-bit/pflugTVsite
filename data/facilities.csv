@@ -1,0 +1,14 @@
+name,company,category,city,region,country,lat,lng,visited,description,link,visibility,public_label
+EXAMPLE – Gulf Coast Refinery,Example Energy Co.,Energy,Baytown,TX,USA,29.7355,-94.9774,2025-03,Replace these rows with your real visits. Full walk-through of the crude unit.,https://pflugtv.com/,public,
+EXAMPLE – Wind Farm,Example Renewables,Energy,Sweetwater,TX,USA,32.4709,-100.4059,2024-10,Nacelle climb and control room tour.,,public,
+EXAMPLE – Automotive Assembly Plant,Example Motors,Manufacturing,Georgetown,KY,USA,38.2098,-84.5588,2025-01,Body shop and final assembly line.,,public,
+EXAMPLE – Steel Mill,Example Steel,Manufacturing,Gary,IN,USA,41.5934,-87.3464,2024-06,Blast furnace and hot strip mill.,,public,
+EXAMPLE – Chip Fab,Example Semi,Semiconductor,Chandler,AZ,USA,33.3062,-111.8413,2025-05,Visible only as an anonymous pin – company and exact location are stripped.,,anonymous,Leading-edge semiconductor fab
+EXAMPLE – Hyperscale Data Center,Example Cloud,Data Center,Ashburn,VA,USA,39.0438,-77.4874,2024-11,,,anonymous,
+EXAMPLE – Container Port,Example Port Authority,Logistics,Long Beach,CA,USA,33.7542,-118.2165,2023-09,Automated cranes and terminal operations.,,public,
+EXAMPLE – Distribution Center,Example Retail,Logistics,Memphis,TN,USA,35.1495,-90.0490,2024-02,,,public,
+EXAMPLE – Hydro Dam,Example Hydro,Energy,Page,AZ,USA,36.9147,-111.4558,2023-05,Generator hall and spillway.,,public,
+EXAMPLE – Brewery,Example Brewing,Food & Beverage,Milwaukee,WI,USA,43.0389,-87.9065,2023-08,Brewhouse and packaging line.,,public,
+EXAMPLE – Offshore Supply Base,Example Marine,Energy,Stavanger,Rogaland,Norway,58.9700,5.7331,2024-04,,,public,
+EXAMPLE – Aerospace Hangar,Example Aero,Aerospace,Toulouse,Occitanie,France,43.6047,1.4442,2025-06,Final assembly line walk-through.,,public,
+EXAMPLE – Private client site,Example Client,Manufacturing,Detroit,MI,USA,42.3314,-83.0458,2022,Never published – hidden rows are dropped from the public data.,,hidden,
