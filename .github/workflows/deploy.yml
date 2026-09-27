@@ -29,6 +29,10 @@ jobs:
           node-version: 22
       - run: npm test
       - run: npm run build
+      # Pages lets browsers cache files for 10 minutes; versioning the app's own
+      # JS/CSS makes a normal refresh pick up a new release straight away.
+      - name: Cache-bust assets
+        run: sed -i -E "s/(href|src)=\"(map\.(css|js))\"/\1=\"\2?v=${GITHUB_SHA::8}\"/g" public/index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
