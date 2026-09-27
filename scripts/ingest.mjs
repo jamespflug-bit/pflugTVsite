@@ -92,14 +92,28 @@ async function getJson(url) {
   return res.json();
 }
 
-export async function fetchCategoryPosts(site, slug) {
+// Lists every post in the category (not just the newest), so posts backdated to
+// an old visit are still found, then downloads full content only for new ones.
+export async function fetchCategoryPosts(site, slug, isNew) {
   const api = `https://public-api.wordpress.com/wp/v2/sites/${site}`;
   const [category] = await getJson(`${api}/categories?slug=${encodeURIComponent(slug)}`);
   if (!category) {
     console.log(`No "${slug}" category on ${site} yet, so there's nothing to import.`);
     return [];
   }
-  return getJson(`${api}/posts?categories=${category.id}&per_page=20&orderby=date&order=desc&_fields=id,date,link,title,content,jetpack_featured_media_url`);
+  const PER_PAGE = 100;
+  const summaries = [];
+  for (let page = 1; ; page++) {
+    const batch = await getJson(`${api}/posts?categories=${category.id}&per_page=${PER_PAGE}&page=${page}&orderby=date&order=desc&_fields=id,link`);
+    summaries.push(...batch);
+    if (batch.length < PER_PAGE) break;
+  }
+  const fields = '_fields=id,date,link,title,content,jetpack_featured_media_url';
+  const posts = [];
+  for (const { id, link } of summaries) {
+    if (isNew(link)) posts.push(await getJson(`${api}/posts/${id}?${fields}`));
+  }
+  return posts;
 }
 
 // ---------- Claude ----------
@@ -210,7 +224,7 @@ async function main() {
   const pending = new Map(parseCsv(process.env.PENDING_CSV ? await readOptional(process.env.PENDING_CSV) : '').filter((r) => r.link && !known.has(r.link)).map((r) => [r.link, r]));
   const categories = [...new Set(existing.map((r) => r.category).filter(Boolean))];
 
-  const posts = (await fetchCategoryPosts(site, slug)).filter((p) => !known.has(p.link) && !skip.has(p.link));
+  const posts = await fetchCategoryPosts(site, slug, (link) => !known.has(link) && !skip.has(link));
   const rows = [];
   const report = [];
 
