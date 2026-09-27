@@ -53,3 +53,9 @@ test('facility types are the fixed filter list', async () => {
   const { FACILITY_TYPES } = await import('./ingest.mjs');
   assert.deepEqual(FACILITY_TYPES, ['Broadcast Center', 'Stadium & Arena', 'TV Production Studio', 'Network Operations Centers', 'Data Center', 'Corporate Centers']);
 });
+
+test('an "unknown" visit date stays blank instead of taking the post date', () => {
+  const row = rowFromExtraction(post, { ...extraction, visited: 'unknown' }, { lat: 1, lng: 2 });
+  assert.equal(row.visited, '');
+  assert.deepEqual(buildDataset(parseCsv(appendRows(COLUMNS.join(','), [row]))).errors, []);
+});

@@ -79,7 +79,8 @@ export function rowFromExtraction(post, x, place) {
     country: x.country,
     lat: place ? place.lat.toFixed(4) : '',
     lng: place ? place.lng.toFixed(4) : '',
-    visited: x.visited || post.date.slice(0, 10),
+    // "unknown" means the post says the date wasn't recorded: leave it blank rather than use the post date.
+    visited: x.visited === 'unknown' ? '' : x.visited || post.date.slice(0, 10),
     description: x.description,
     link: post.link,
     visibility: x.visibility,
@@ -133,7 +134,7 @@ const visitSchema = (types) => ({
     city: { type: 'string' },
     region: { type: 'string', description: 'State / province, abbreviated for the US (e.g. "CA").' },
     country: { type: 'string', description: 'Use "USA" and "UK" for those two; full English name otherwise.' },
-    visited: { type: 'string', description: 'YYYY-MM-DD, YYYY-MM or YYYY. Use the post date unless the text names a different visit date.' },
+    visited: { type: 'string', description: 'YYYY-MM-DD, YYYY-MM or YYYY. Use the post date unless the text names a different visit date. Use "unknown" if the post says the visit date is not recorded.' },
     description: { type: 'string', description: 'One sentence for the map popup, first person, factual, under 25 words.' },
     visibility: { type: 'string', enum: ['public', 'anonymous'], description: '"anonymous" only if the post says the site or client is confidential / under NDA.' },
     public_label: { type: 'string', description: 'For anonymous sites: a generic label like "Major streaming operations center". Empty otherwise.' },
@@ -254,7 +255,7 @@ async function main() {
       else if (place.cityLevel) flags.push(`📍 Pinned to the city centre (only "${place.query}" matched), so adjust \`lat\`/\`lng\` if you want the exact venue`);
       if (row.visibility === 'anonymous') flags.push(`🔒 Marked anonymous, shown as "${row.public_label}"`);
       if (x.reviewer_notes) flags.push(`📝 ${x.reviewer_notes}`);
-      report.push(`- **${row.name}**, ${[row.city, row.region, row.country].filter(Boolean).join(', ')} · ${row.category} · ${row.visited} (from [${title}](${post.link}))` +
+      report.push(`- **${row.name}**, ${[row.city, row.region, row.country].filter(Boolean).join(', ')} · ${row.category} · ${row.visited || 'date not recorded'} (from [${title}](${post.link}))` +
         (place ? ` · [check pin](https://www.openstreetmap.org/?mlat=${row.lat}&mlon=${row.lng}#map=16/${row.lat}/${row.lng})` : '') +
         flags.map((f) => `\n  - ${f}`).join(''));
     } catch (err) {
