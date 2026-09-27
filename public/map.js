@@ -114,7 +114,7 @@
     cluster.clearLayers();
     cluster.addLayers(visible.map((f) => f.marker));
 
-    $('count').textContent = `Showing ${visible.length} of ${facilities.length}`;
+    $('count').textContent = facilities.length ? `Showing ${visible.length} of ${facilities.length}` : '';
     $('list').innerHTML = visible.length
       ? visible.map((f) => `<li><button type="button" data-i="${f.index}">
           <span class="dot" style="--c:${colors.get(f.category)}"></span>
@@ -122,7 +122,7 @@
           <span class="year">${esc(formatVisited(f.visited))}</span>
           <span class="meta">${esc(place(f))}</span>
         </button></li>`).join('')
-      : '<li class="empty">No facilities match.</li>';
+      : `<li class="empty">${facilities.length ? 'No facilities match.' : 'The first visits are being added. Check back soon.'}</li>`;
   }
 
   function focus(f) {
@@ -145,7 +145,7 @@
         const marker = L.marker([f.lat, f.lng], { icon, title: f.name, keyboard: true }).bindPopup(popupHtml(f), { maxWidth: 300 });
         return { ...f, index, marker };
       });
-      renderStats(data.stats);
+      if (facilities.length) renderStats(data.stats);
       renderChips(data.categories);
       update();
       if (facilities.length) map.fitBounds(L.latLngBounds(facilities.map((f) => [f.lat, f.lng])), { padding: [40, 40], maxZoom: 6 });

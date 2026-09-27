@@ -65,6 +65,30 @@ The easiest way to add a visit is to post about it on pflugtv.com:
    if anything needs changing, then tap **Merge**. The map updates about a
    minute later, and each pin links to its blog post.
 
+### Fastest route: Google Photos → email
+
+For posting many past visits quickly, use WordPress.com's **Post by Email**.
+Turn it on once under Settings → Writing → Post by Email, which gives you a
+secret `…@post.wordpress.com` address. Save it as a phone contact, e.g.
+"Map Post". Keep it private, because anyone with it can publish to the blog.
+Then, for each visit:
+
+1. In Google Photos, open the photo → **Share** → Gmail (or any mail app) →
+   send to **Map Post**.
+2. **Subject:** the facility, e.g. `NHK Broadcast Center, Tokyo`. This
+   becomes the post title.
+3. **Body:** the category code plus a line or two, **including the year**:
+
+   ```
+   [category On Location]
+   March 2004. Helped commission the new HD master control.
+   ```
+
+The post publishes right away with the photo. The importer picks it up
+within the hour and uses the year from the text, since WordPress strips the
+photo's own date. Add `[status draft]` to hold a post back for editing
+first. Drafts aren't imported until you publish them.
+
 Posts that don't read like a facility visit are recorded in
 `data/ingest-skip.txt` instead, so they aren't processed again. Each new
 post costs a few cents of Claude usage. Hourly checks with nothing new are
